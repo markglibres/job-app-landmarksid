@@ -1,9 +1,10 @@
 package main
 
 import (
-	"./lib"
+	"./lib/webscraper"
 	"./models"
-	"./stores"
+	"./stores/dominos"
+	"./stores/pizzahut"
 )
 
 const (
@@ -12,21 +13,11 @@ const (
 
 func main() {
 	storeScrapers := make([]data.StoreScraper, 2)
-	storeScrapers[0] = stores.PizzaHut{}
-	storeScrapers[1] = stores.Dominos{}
-
-	scrapeDone := make(chan bool, len(storeScrapers))
+	storeScrapers[0] = pizzahut.StoreScraper{}
+	storeScrapers[1] = dominos.StoreScraper{}
 
 	for _, store := range storeScrapers {
-		go func(store data.StoreScraper, fullPath string) {
-			branches := webscraper.Scrape(store)
-			webscraper.SaveToCSV(branches, fullPath)
-			scrapeDone <- true
-		}(store, csvDir+store.GetName()+".csv")
-
+		webscraper.Scrape(store, csvDir+store.GetName()+".csv")
 	}
-
-	<-scrapeDone
-	close(scrapeDone)
 
 }

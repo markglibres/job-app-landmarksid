@@ -2,7 +2,7 @@ package data
 
 type StoreInfo struct {
 	Name, Address       string
-	Latitude, Longitude float64
+	Latitude, Longitude string
 }
 
 type StoreScraper interface {
