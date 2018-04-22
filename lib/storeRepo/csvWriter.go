@@ -1,4 +1,4 @@
-package webscraper
+package storeRepo
 
 import (
 	"encoding/csv"
@@ -10,13 +10,7 @@ import (
 
 var fileHeaders = []string{"Name", "Address", "Latitude", "Longitude"}
 
-func Scrape(store data.StoreScraper, fullPath string) {
-
-	results := store.GetBranchStores()
-	SaveToCSV(results, fullPath)
-}
-
-func SaveToCSV(branches []data.StoreInfo, filePath string) {
+func SaveToCSV(branches []*data.StoreInfo, filePath string) {
 
 	file, err := os.Create(filePath)
 	checkError(err, "Cannot create file")

@@ -7,11 +7,9 @@ import (
 	"../../models"
 )
 
-const (
-	storesApiEndPoint string = "https://ecommerce-deploy-61-api.prod.pizzahutaustralia.com.au/api/services/app/store/GetTradingStoresStates"
-)
-
-type StoreScraper struct {
+type Scraper struct {
+	Url      string
+	Response *apiResponse
 }
 
 type storeResponse struct {
@@ -54,37 +52,48 @@ type apiResponse struct {
 	Result  storesResponse `json:"result"`
 }
 
-func (store StoreScraper) GetBranchStores() []data.StoreInfo {
-	jsonStores := getStoresFromApi(storesApiEndPoint)
-	return parseStores(jsonStores)
+func CreateScraper(url string) *Scraper {
+	scraper := new(Scraper)
+	scraper.Url = url
+	scraper.Response = scraper.GetResponse()
+
+	return scraper
 }
 
-func (store StoreScraper) GetName() string {
-	return "PizzaHut"
+func (scraper *Scraper) Scrape() []*data.StoreInfo {
+	return scraper.ParseStores()
 }
 
-func getStoresFromApi(url string) []storeResponse {
-	result := apiResponse{}
-	err := json.Get(url, &result)
+func (scraper *Scraper) GetResponse() *apiResponse {
+	response := new(apiResponse)
+	err := json.Get(scraper.Url, &response)
 	if err != nil {
 		panic(err.Error())
 	}
-	return result.Result.Stores
+	return response
 }
 
-func parseStores(jsonStores []storeResponse) []data.StoreInfo {
-	stores := make([]data.StoreInfo, len(jsonStores))
-	for index, store := range jsonStores {
-		stores[index] = parseStore(store)
+func (scraper Scraper) GetName() string {
+	return "PizzaHut"
+}
+
+func (scraper *Scraper) ParseStores() []*data.StoreInfo {
+	var stores []*data.StoreInfo
+
+	for _, store := range scraper.Response.Result.Stores {
+		stores = append(stores, scraper.ParseStore(store))
 	}
 	return stores
 }
 
-func parseStore(jsonStore storeResponse) data.StoreInfo {
+func (scraper *Scraper) ParseStore(jsonStore storeResponse) *data.StoreInfo {
 	location := strings.Split(jsonStore.Location, ",")
-	return data.StoreInfo{
-		Name:      jsonStore.Name,
-		Address:   jsonStore.AddressLine1 + " " + jsonStore.AddressLine2,
-		Latitude:  location[0],
-		Longitude: location[1]}
+	store := new(data.StoreInfo)
+
+	store.Name = jsonStore.Name
+	store.Address = jsonStore.AddressLine1 + " " + jsonStore.AddressLine2
+	store.Latitude = location[0]
+	store.Longitude = location[1]
+
+	return store
 }

@@ -6,6 +6,11 @@ type StoreInfo struct {
 }
 
 type StoreScraper interface {
-	GetBranchStores() []StoreInfo
+	Scrape() []*StoreInfo
 	GetName() string
+}
+
+type ChannelInfo struct {
+	Name   string
+	IsDone bool
 }
