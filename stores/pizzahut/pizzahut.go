@@ -3,7 +3,7 @@ package pizzahut
 import (
 	"strings"
 
-	"../../lib/jsonService"
+	"../../lib/json"
 	"../../models"
 )
 
@@ -65,7 +65,7 @@ func (store StoreScraper) GetName() string {
 
 func getStoresFromApi(url string) []storeResponse {
 	result := apiResponse{}
-	err := jsonService.GetJson(url, &result)
+	err := json.Get(url, &result)
 	if err != nil {
 		panic(err.Error())
 	}
